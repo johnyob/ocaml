@@ -828,6 +828,9 @@ and structure_item i ppf x =
   | Pstr_value (rf, l) ->
       line i ppf "Pstr_value %a\n" fmt_rec_flag rf;
       list i value_binding ppf l;
+  | Pstr_value_description vd ->
+      line i ppf "Pstr_value_description\n";
+      value_description i ppf vd;
   | Pstr_primitive vd ->
       line i ppf "Pstr_primitive\n";
       value_description i ppf vd;

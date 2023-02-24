@@ -487,7 +487,7 @@ and add_struct_item (bv, m) item : _ String.Map.t * _ String.Map.t =
       add_expr bv e; (bv, m)
   | Pstr_value(rf, pel) ->
       let bv = add_bindings rf bv pel in (bv, m)
-  | Pstr_primitive vd ->
+  | Pstr_value_description vd | Pstr_primitive vd ->
       add_type bv vd.pval_type; (bv, m)
   | Pstr_type (_, dcls) ->
       List.iter (add_type_declaration bv) dcls; (bv, m)
