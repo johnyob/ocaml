@@ -2478,6 +2478,7 @@ and type_structure ?(toplevel = false) funct_body anchor env sstr =
         List.rev items,
         shape_map,
         newenv
+    | Pstr_value_description _ -> assert false
     | Pstr_primitive sdesc ->
         let (desc, newenv) = Typedecl.transl_value_decl env loc sdesc in
         Signature_names.check_value names desc.val_loc desc.val_id;
