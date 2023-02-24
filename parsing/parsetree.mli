@@ -982,7 +982,7 @@ and structure_item_desc =
             - [let rec P1 = E1 and ... and Pn = EN ]
                 when [rec] is {{!Asttypes.rec_flag.Recursive}[Recursive]}.
         *)
-  | Pstr_spec of value_description
+  | Pstr_value_description of value_description
       (** [val x: T] *)
   | Pstr_primitive of value_description
       (** [external x: T = "s1" ... "sn" ] *)

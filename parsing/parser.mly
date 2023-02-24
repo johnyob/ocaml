@@ -58,6 +58,8 @@ let mkcty ~loc ?attrs d = Cty.mk ~loc:(make_loc loc) ?attrs d
 
 let pstr_typext (te, ext) =
   (Pstr_typext te, ext)
+let pstr_value_description (vd, ext) =
+  (Pstr_value_description vd, ext)
 let pstr_primitive (vd, ext) =
   (Pstr_primitive vd, ext)
 let pstr_type ((nr, ext), tys) =
@@ -1417,7 +1419,7 @@ structure_item:
       primitive_declaration
         { pstr_primitive $1 }
     | value_description
-        { pstr_primitive $1 }
+        { pstr_value_description $1 }
     | type_declarations
         { pstr_type $1 }
     | str_type_extension
