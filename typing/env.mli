@@ -34,6 +34,7 @@ type module_unbound_reason =
 type summary =
     Env_empty
   | Env_value of summary * Ident.t * value_description
+  | Env_value_spec of summary * Ident.t * value_description
   | Env_type of summary * Ident.t * type_declaration
   | Env_extension of summary * Ident.t * extension_constructor
   | Env_module of summary * Ident.t * module_presence * module_declaration
@@ -283,7 +284,8 @@ val make_copy_of_types: t -> (t -> t)
 (* Insertion by identifier *)
 
 val add_value:
-    ?check:(string -> Warnings.t) -> Ident.t -> value_description -> t -> t
+    ?check:(string -> Warnings.t) -> is_spec:bool -> Ident.t ->
+    value_description -> t -> t
 val add_type: check:bool -> Ident.t -> type_declaration -> t -> t
 val add_extension:
   check:bool -> rebind:bool -> Ident.t -> extension_constructor -> t -> t
@@ -341,7 +343,7 @@ val remove_last_open: Path.t -> t -> t option
 (* Insertion by name *)
 
 val enter_value:
-    ?check:(string -> Warnings.t) ->
+    ?check:(string -> Warnings.t) -> is_spec:bool ->
     string -> value_description -> t -> Ident.t * t
 val enter_type: scope:int -> string -> type_declaration -> t -> Ident.t * t
 val enter_extension:

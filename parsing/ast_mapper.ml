@@ -364,6 +364,7 @@ module M = struct
         let attrs = sub.attributes sub attrs in
         eval ~loc ~attrs (sub.expr sub x)
     | Pstr_value (r, vbs) -> value ~loc r (List.map (sub.value_binding sub) vbs)
+    | Pstr_value_description vd -> value_description ~loc (sub.value_description sub vd)
     | Pstr_primitive vd -> primitive ~loc (sub.value_description sub vd)
     | Pstr_type (rf, l) -> type_ ~loc rf (List.map (sub.type_declaration sub) l)
     | Pstr_typext te -> type_extension ~loc (sub.type_extension sub te)

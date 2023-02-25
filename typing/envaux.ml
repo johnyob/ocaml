@@ -37,7 +37,10 @@ let rec env_from_summary sum subst =
         Env_empty ->
           Env.empty
       | Env_value(s, id, desc) ->
-          Env.add_value id (Subst.value_description subst desc)
+          Env.add_value ~is_spec:true id (Subst.value_description subst desc)
+                        (env_from_summary s subst)
+      | Env_value_spec(s, id, desc) ->
+          Env.add_value ~is_spec:false id (Subst.value_description subst desc)
                         (env_from_summary s subst)
       | Env_type(s, id, desc) ->
           Env.add_type ~check:false id

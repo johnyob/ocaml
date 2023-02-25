@@ -143,7 +143,7 @@ let rec push_defaults loc bindings use_lhs cases partial =
          val_attributes = []; Types.val_loc = Location.none;
          val_uid = Types.Uid.internal_not_actually_unique; }
       in
-      let env = Env.add_value param desc exp.exp_env in
+      let env = Env.add_value ~is_spec:false param desc exp.exp_env in
       let name = Ident.name param in
       let exp =
         let cases =

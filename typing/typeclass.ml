@@ -490,7 +490,7 @@ let add_instance_var_met loc label id sign cl_num attrs met_env =
       Types.val_loc = loc;
       val_uid = Uid.mk ~current_unit:(Env.get_unit_name ()) }
   in
-  Env.add_value id desc met_env
+  Env.add_value ~is_spec:false id desc met_env
 
 let add_instance_vars_met loc vars sign cl_num met_env =
   List.fold_left

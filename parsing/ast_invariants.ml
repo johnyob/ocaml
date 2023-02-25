@@ -26,6 +26,8 @@ let empty_type loc = err loc "Type declarations cannot be empty."
 let complex_id loc = err loc "Functor application not allowed here."
 let module_type_substitution_missing_rhs loc =
   err loc "Module type substitution with no right hand side"
+let external_value_description loc = err loc "Value description in structure cannot be external."
+let internal_primitive loc = err loc "Primitive cannot be internal."
 
 let simple_longident id =
   let rec is_simple = function
@@ -135,6 +137,10 @@ let iterator =
     match st.pstr_desc with
     | Pstr_type (_, []) -> empty_type loc
     | Pstr_value (_, []) -> empty_let loc
+    | Pstr_value_description { pval_prim = _ :: _ } ->
+        external_value_description loc
+    | Pstr_primitive { pval_prim = [] } ->
+        internal_primitive loc
     | _ -> ()
   in
   let signature_item self sg =

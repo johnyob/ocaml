@@ -149,6 +149,7 @@ type module_unbound_reason =
 type summary =
     Env_empty
   | Env_value of summary * Ident.t * value_description
+  | Env_value_spec of summary * Ident.t * value_description
   | Env_type of summary * Ident.t * type_declaration
   | Env_extension of summary * Ident.t * extension_constructor
   | Env_module of summary * Ident.t * module_presence * module_declaration
@@ -166,6 +167,7 @@ type summary =
 let map_summary f = function
     Env_empty -> Env_empty
   | Env_value (s, id, d) -> Env_value (f s, id, d)
+  | Env_value_spec (s, id, d) -> Env_value_spec (f s, id, d)
   | Env_type (s, id, d) -> Env_type (f s, id, d)
   | Env_extension (s, id, d) -> Env_extension (f s, id, d)
   | Env_module (s, id, p, d) -> Env_module (f s, id, p, d)
@@ -567,7 +569,8 @@ and address_lazy = (address_unforced, address) Lazy_backtrack.t
 and value_data =
   { vda_description : value_description;
     vda_address : address_lazy;
-    vda_shape : Shape.t }
+    vda_shape : Shape.t;
+    vda_is_spec : bool }
 
 and value_entry =
   | Val_bound of value_data
@@ -1729,7 +1732,7 @@ let rec components_of_module_maker
             in
             let vda_shape = Shape.proj cm_shape (Shape.Item.value id) in
             let vda =
-              { vda_description = decl'; vda_address = addr; vda_shape }
+              { vda_description = decl'; vda_address = addr; vda_shape; vda_is_spec = false }
             in
             c.comp_values <- NameMap.add (Ident.name id) vda c.comp_values;
         | SigL_type(id, decl, _, _) ->
@@ -1905,7 +1908,7 @@ and check_value_name name loc =
         error (Illegal_value_name(loc, name))
     done
 
-and store_value ?check id addr decl shape env =
+and store_value ?check id addr decl shape is_spec env =
   check_value_name (Ident.name id) decl.val_loc;
   Option.iter
     (fun f -> check_usage decl.val_loc id decl.val_uid f !value_declarations)
@@ -1913,11 +1916,16 @@ and store_value ?check id addr decl shape env =
   let vda =
     { vda_description = decl;
       vda_address = addr;
-      vda_shape = shape }
+      vda_shape = shape;
+      vda_is_spec = is_spec }
   in
   { env with
     values = IdTbl.add id (Val_bound vda) env.values;
-    summary = Env_value(env.summary, id, decl) }
+    summary =
+      if is_spec then
+        Env_value_spec (env.summary, id, decl)
+      else
+        Env_value (env.summary, id, decl) }
 
 and store_constructor ~check type_decl type_id cstr_id cstr env =
   if check && not type_decl.type_loc.Location.loc_ghost
@@ -2166,10 +2174,10 @@ let add_functor_arg id env =
    functor_args = Ident.add id () env.functor_args;
    summary = Env_functor_arg (env.summary, id)}
 
-let add_value ?check ?shape id desc env =
+let add_value ?check ?shape ~is_spec id desc env =
   let addr = value_declaration_address env id desc in
   let shape = shape_or_leaf desc.val_uid shape in
-  store_value ?check id addr desc shape env
+  store_value ?check id addr desc shape is_spec env
 
 let add_type ~check ?shape id info env =
   let shape = shape_or_leaf info.type_uid shape in
@@ -2241,10 +2249,10 @@ let scrape_alias t mty =
 
 (* Insertion of bindings by name *)
 
-let enter_value ?check name desc env =
+let enter_value ?check ~is_spec name desc env =
   let id = Ident.create_local name in
   let addr = value_declaration_address env id desc in
-  let env = store_value ?check id addr desc (Shape.leaf desc.val_uid) env in
+  let env = store_value ?check id addr desc (Shape.leaf desc.val_uid) is_spec env in
   (id, env)
 
 let enter_type ~scope name info env =
@@ -2296,7 +2304,7 @@ let add_item (map, mod_shape) comp env =
   match comp with
   | Sig_value(id, decl, _) ->
       let map, shape = proj_shape (Shape.Item.value id) in
-      map, add_value ?shape id decl env
+      map, add_value ?shape ~is_spec:false id decl env
   | Sig_type(id, decl, _, _) ->
       let map, shape = proj_shape (Shape.Item.type_ id) in
       map, add_type ~check:false ?shape id decl env

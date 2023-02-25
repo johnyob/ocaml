@@ -1442,6 +1442,11 @@ and structure_item ctxt f x =
               (list ~sep:"@," (class_declaration "and")) xs
       end
   | Pstr_class_type l -> class_type_declaration_list ctxt f l
+  | Pstr_value_description vd ->
+      pp f "@[<hov2>%a@ :@ %a@]%a"
+        protect_ident vd.pval_name.txt
+        (value_description ctxt) vd
+        (item_attributes ctxt) vd.pval_attributes
   | Pstr_primitive vd ->
       pp f "@[<hov2>external@ %a@ :@ %a@]%a"
         protect_ident vd.pval_name.txt
